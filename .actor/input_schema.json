@@ -1,0 +1,66 @@
+{
+    "$schema": "https://apify.com/schemas/v1/input.ide.json",
+    "title": "QuassLabs Dev QA Tools input",
+    "description": "Pick a tool, then give it one input (`input`) or many (`items`). Each input is the same JSON body the QuassLabs REST endpoint takes; see the README or https://docs.quasslabs.com for every tool's fields.",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "tool": {
+            "title": "Tool",
+            "type": "string",
+            "description": "Which QuassLabs check to run.",
+            "editor": "select",
+            "enum": [
+                "regex_lint",
+                "mcp_tool_lint",
+                "openapi_diff",
+                "commit_hygiene",
+                "pr_description_lint",
+                "ticket_lint",
+                "story_lint",
+                "acceptance_criteria_validator",
+                "readability_grade",
+                "humanizer_score",
+                "log_analyzer",
+                "dependency_check",
+                "saas_metrics",
+                "estimate_sanity",
+                "sprint_health"
+            ],
+            "enumTitles": [
+                "Regex lint (ReDoS risk + explanation)",
+                "MCP tool lint (tool definitions)",
+                "OpenAPI diff (breaking changes + semver)",
+                "Commit hygiene",
+                "PR description lint",
+                "Jira ticket lint",
+                "User story lint",
+                "Acceptance criteria validator",
+                "Readability grade (Flesch)",
+                "Humanizer score (AI-writing tells)",
+                "Log analyzer",
+                "Dependency manifest check",
+                "SaaS metrics",
+                "Estimate sanity",
+                "Sprint health"
+            ],
+            "default": "regex_lint",
+            "prefill": "regex_lint"
+        },
+        "input": {
+            "title": "Tool input (single call)",
+            "type": "object",
+            "description": "The JSON body for one call of the selected tool. Ignored when `items` is non-empty. Example for regex_lint: {\"pattern\": \"(a+)+$\"}.",
+            "editor": "json",
+            "prefill": { "pattern": "(a+)+$" }
+        },
+        "items": {
+            "title": "Batch of tool inputs",
+            "type": "array",
+            "description": "Optional. A list of JSON bodies, each one call of the selected tool (max 1000 per run). One tool-call event is charged per item that succeeds; failed items are free. When set, `input` is ignored.",
+            "editor": "json",
+            "maxItems": 1000
+        }
+    },
+    "required": ["tool"]
+}

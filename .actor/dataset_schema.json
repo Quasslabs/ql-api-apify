@@ -1,0 +1,87 @@
+{
+    "$schema": "https://apify.com/schemas/v1/dataset.ide.json",
+    "actorSpecification": 1,
+    "fields": {
+        "type": "object",
+        "required": [
+            "tool",
+            "input_index",
+            "status"
+        ],
+        "properties": {
+            "tool": {
+                "type": "string",
+                "description": "The QuassLabs tool that was run."
+            },
+            "input_index": {
+                "type": "integer",
+                "description": "Zero-based position of the input in `items` (0 for single `input`)."
+            },
+            "status": {
+                "type": "string",
+                "enum": [
+                    "ok",
+                    "error"
+                ],
+                "description": "ok = the tool answered (charged one tool-call event). error = not charged."
+            },
+            "result": {
+                "description": "The tool's JSON response, present when status is ok. Shape depends on the tool; see https://docs.quasslabs.com."
+            },
+            "error": {
+                "type": "object",
+                "description": "Present when status is error.",
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "http_status": {
+                        "type": "integer"
+                    }
+                }
+            }
+        }
+    },
+    "views": {
+        "overview": {
+            "title": "Overview",
+            "transformation": {
+                "fields": [
+                    "input_index",
+                    "tool",
+                    "status",
+                    "result",
+                    "error"
+                ]
+            },
+            "display": {
+                "component": "table",
+                "properties": {
+                    "input_index": {
+                        "label": "#",
+                        "format": "number"
+                    },
+                    "tool": {
+                        "label": "Tool",
+                        "format": "text"
+                    },
+                    "status": {
+                        "label": "Status",
+                        "format": "text"
+                    },
+                    "result": {
+                        "label": "Result",
+                        "format": "object"
+                    },
+                    "error": {
+                        "label": "Error",
+                        "format": "object"
+                    }
+                }
+            }
+        }
+    }
+}

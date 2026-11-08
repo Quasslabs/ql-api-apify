@@ -1,0 +1,22 @@
+{
+    "$schema": "https://apify.com/schemas/v1/actor.ide.json",
+    "actorSpecification": 1,
+    "name": "quasslabs-dev-qa-tools",
+    "title": "QuassLabs Dev QA Tools",
+    "description": "Lint regexes, MCP tools, OpenAPI diffs, commits, PRs, Jira tickets, user stories and acceptance criteria, plus readability, AI-writing, log, dependency, SaaS-metric, estimate and sprint checks. Deterministic, no LLM. Batch many inputs per run.",
+    "version": "0.1",
+    "buildTag": "latest",
+    "meta": {
+        "templateId": "python-empty"
+    },
+    "minMemoryMbytes": 128,
+    "defaultMemoryMbytes": 256,
+    "maxMemoryMbytes": 512,
+    "inputSchema": "./input_schema.json",
+    "outputSchema": "./output_schema.json",
+    "storages": {
+        "dataset": "./dataset_schema.json"
+    },
+    "dockerfile": "../Dockerfile",
+    "readme": "../README.md"
+}
