@@ -4,7 +4,8 @@
 event and checking the spending limit; `main.py` wires them to the Apify SDK.
 
 Billing rules (pay-per-event):
-- One `tool-call` event per item that our API answered with a 2xx.
+- One event per item that our API answered with a 2xx: `tool-call` for most
+  tools, `heavy-tool-call` for the tools in tools.HEAVY_TOOLS.
 - The charge happens AFTER the result is pushed to the dataset, so a user is
   never billed for a result they cannot see.
 - 4xx / 5xx answers, network failures and inputs rejected locally are pushed
@@ -23,11 +24,12 @@ from typing import Any, Awaitable, Callable
 
 import httpx
 
-from .tools import endpoint_for
+from .tools import HEAVY_TOOLS, endpoint_for
 
-# The event price lives in Apify Console (Publishing > Monetization), not in
-# code. Launch placeholder: $0.01 per tool-call.
+# Event prices live in Apify Console (Publishing > Monetization), not in code.
+# Launch prices: tool-call $0.02, heavy-tool-call $0.08.
 EVENT_NAME = 'tool-call'
+HEAVY_EVENT_NAME = 'heavy-tool-call'
 DEFAULT_BASE_URL = 'https://api.quasslabs.com'
 MAX_ITEMS = 1000
 REQUEST_TIMEOUT_S = 60.0
@@ -66,6 +68,11 @@ def redact(text: str, secret: str | None) -> str:
 SYNTHETIC_DATASET_EVENT = 'apify-default-dataset-item'
 
 
+def event_for(tool: str) -> str:
+    """The pay-per-event name charged for one successful call of `tool`."""
+    return HEAVY_EVENT_NAME if tool in HEAVY_TOOLS else EVENT_NAME
+
+
 def pricing_warnings(is_pay_per_event: bool, per_event_prices: dict) -> list[str]:
     """Owner-facing warnings about a pricing setup that breaks the billing rules.
 
@@ -83,6 +90,9 @@ def pricing_warnings(is_pay_per_event: bool, per_event_prices: dict) -> list[str
         )
     if EVENT_NAME not in per_event_prices:
         out.append(f'Pricing has no "{EVENT_NAME}" event, so successful calls are not billed.')
+    if HEAVY_EVENT_NAME not in per_event_prices:
+        heavy = ', '.join(sorted(HEAVY_TOOLS))
+        out.append(f'Pricing has no "{HEAVY_EVENT_NAME}" event, so {heavy} calls are not billed.')
     return out
 
 
@@ -187,6 +197,7 @@ async def run_batch(
     push: PushFn,
     charge: ChargeFn,
     limit_reached: LimitFn,
+    event_name: str = EVENT_NAME,
 ) -> BatchSummary:
     summary = BatchSummary()
     for index, item in enumerate(items):
@@ -217,7 +228,7 @@ async def run_batch(
             summary.succeeded += 1
             result = await charge()
             summary.charged += 1
-            log.info('Item %d: ok (charged %s).', index, EVENT_NAME)
+            log.info('Item %d: ok (charged %s).', index, event_name)
             if getattr(result, 'event_charge_limit_reached', False) and index < len(items) - 1:
                 summary.stopped_on_limit = True
                 log.info('Spending limit reached after item %d; stopping.', index)

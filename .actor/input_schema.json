@@ -57,7 +57,7 @@
         "items": {
             "title": "Batch of tool inputs",
             "type": "array",
-            "description": "Optional. A list of JSON bodies, each one call of the selected tool (max 1000 per run). One tool-call event is charged per item that succeeds; failed items are free. When set, `input` is ignored.",
+            "description": "Optional. A list of JSON bodies, each one call of the selected tool (max 1000 per run). One event is charged per item that succeeds (heavy-tool-call for log_analyzer, tool-call for the rest); failed items are free. When set, `input` is ignored.",
             "editor": "json",
             "maxItems": 1000
         }

@@ -30,6 +30,14 @@ TOOLS: dict[str, str] = {
     'sprint_health': '/v1/sprint-health',
 }
 
+# Tools that cost QuassLabs more than one credit per call on the direct API.
+# They charge the `heavy-tool-call` event instead of `tool-call`, so the
+# Apify price stays above the direct price. tests/test_tools.py checks this
+# set against the platform's endpoint_credits when that checkout is present.
+HEAVY_TOOLS: frozenset[str] = frozenset({
+    'log_analyzer',
+})
+
 # Tools that must never be reachable through this Actor, even if someone adds
 # them to TOOLS by mistake. Enforced by a test.
 EXCLUDED: frozenset[str] = frozenset({

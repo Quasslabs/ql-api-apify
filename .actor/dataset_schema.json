@@ -23,7 +23,7 @@
                     "ok",
                     "error"
                 ],
-                "description": "ok = the tool answered (charged one tool-call event). error = not charged."
+                "description": "ok = the tool answered (charged one tool-call or heavy-tool-call event). error = not charged."
             },
             "result": {
                 "description": "The tool's JSON response, present when status is ok. Shape depends on the tool; see https://docs.quasslabs.com."

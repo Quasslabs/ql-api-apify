@@ -218,9 +218,33 @@ async def test_redaction_marks_echoed_key():
 def test_pricing_warnings():
     from decimal import Decimal
     assert core.pricing_warnings(False, {}) == []
-    assert core.pricing_warnings(True, {'tool-call': Decimal('0.01')}) == []
-    w = core.pricing_warnings(True, {'tool-call': Decimal('0.01'), 'apify-default-dataset-item': Decimal('0.001')})
+    both = {'tool-call': Decimal('0.02'), 'heavy-tool-call': Decimal('0.08')}
+    assert core.pricing_warnings(True, both) == []
+    w = core.pricing_warnings(True, {**both, 'apify-default-dataset-item': Decimal('0.001')})
     assert len(w) == 1 and 'apify-default-dataset-item' in w[0]
-    assert core.pricing_warnings(True, {'tool-call': Decimal('0.01'), 'apify-default-dataset-item': Decimal(0)}) == []
-    w = core.pricing_warnings(True, {'apify-actor-start': Decimal('0.005')})
-    assert len(w) == 1 and 'tool-call' in w[0]
+    assert core.pricing_warnings(True, {**both, 'apify-default-dataset-item': Decimal(0)}) == []
+    w = core.pricing_warnings(True, {'heavy-tool-call': Decimal('0.08')})
+    assert len(w) == 1 and '"tool-call"' in w[0]
+    w = core.pricing_warnings(True, {'tool-call': Decimal('0.02')})
+    assert len(w) == 1 and 'heavy-tool-call' in w[0] and 'log_analyzer' in w[0]
+
+
+def test_event_for_routes_heavy_tools():
+    assert core.event_for('log_analyzer') == 'heavy-tool-call'
+    for tool in core.endpoint_for.__globals__['TOOLS']:
+        if tool != 'log_analyzer':
+            assert core.event_for(tool) == 'tool-call', tool
+
+
+async def test_batch_logs_the_event_it_was_given(caplog):
+    h = Harness(lambda r: httpx.Response(200, json={'ok': True}))
+    caplog.set_level(logging.INFO, logger='ql_actor')
+    path = core.endpoint_for('log_analyzer')
+    async with h.client:
+        summary = await run_batch(
+            tool='log_analyzer', path=path, items=[{'text': 'x'}], api_key=KEY, base_url=BASE,
+            client=h.client, push=h.push, charge=h.charge, limit_reached=h.limit_reached,
+            event_name=core.event_for('log_analyzer'),
+        )
+    assert summary.charged == 1 and h.charges == 1
+    assert 'charged heavy-tool-call' in caplog.text
