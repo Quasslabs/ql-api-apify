@@ -1,0 +1,26 @@
+{
+    "$schema": "https://apify.com/schemas/v1/actor.ide.json",
+    "actorSpecification": 1,
+    "name": "quasslabs-data-cleanup",
+    "title": "QuassLabs Data Cleanup",
+    "description": "Clean messy CSV, infer a JSON Schema from samples, extract fields with JSONPath, convert units exactly and dedupe text (exact, normalized or near-duplicate). Deterministic, no LLM, nothing executed. Batch many inputs per run.",
+    "version": "0.1",
+    "buildTag": "latest",
+    "meta": {
+        "templateId": "python-empty"
+    },
+    "minMemoryMbytes": 128,
+    "defaultMemoryMbytes": 256,
+    "maxMemoryMbytes": 512,
+    "environmentVariables": {
+        "QL_ACTOR_PROFILE": "data-cleanup"
+    },
+    "inputSchema": "./input_schema.json",
+    "outputSchema": "./output_schema.json",
+    "storages": {
+        "dataset": "./dataset_schema.json"
+    },
+    "dockerfile": "../../../Dockerfile",
+    "dockerContextDir": "../../..",
+    "readme": "../README.md"
+}

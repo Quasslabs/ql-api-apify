@@ -3,7 +3,7 @@
     "actorSpecification": 1,
     "name": "quasslabs-dev-qa-tools",
     "title": "QuassLabs Dev QA Tools",
-    "description": "Lint regexes, MCP tools, OpenAPI diffs, commits, PRs, Jira tickets, user stories and acceptance criteria, plus readability, AI-writing, log, dependency, SaaS-metric, estimate and sprint checks. Deterministic, no LLM. Batch many inputs per run.",
+    "description": "Audit GitHub Actions workflows and SQL migrations. Lint regexes, MCP tools, agent cards, SKILL.md, OpenAPI diffs, commits, PRs, tickets, stories and acceptance criteria. Plus coverage, bug triage, log, dependency and sprint checks. Deterministic, no LLM.",
     "version": "0.1",
     "buildTag": "latest",
     "meta": {

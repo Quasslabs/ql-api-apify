@@ -1,6 +1,6 @@
 ## What is QuassLabs Dev QA Tools?
 
-**QuassLabs Dev QA Tools** is a set of **deterministic developer and QA linters** you can run on Apify. Use it to lint regexes for ReDoS risk, find breaking changes between two OpenAPI specs, check commit messages, PR descriptions, Jira tickets, user stories and acceptance criteria, and score text, logs, dependency manifests, SaaS metrics, estimates and sprints.
+**QuassLabs Dev QA Tools** is a set of **deterministic developer and QA linters** you can run on Apify. Use it to lint regexes for ReDoS risk, find breaking changes between two OpenAPI specs, check commit messages, PR descriptions, Jira tickets, user stories and acceptance criteria, and score text, logs, dependency manifests, SaaS metrics, estimates and sprints. It also audits GitHub Actions workflows and SQL migrations, lints A2A agent cards and SKILL.md files, checks requirements coverage and triages bug reports.
 
 Pick a **tool**, paste one JSON **input**, or send a batch of **items** to lint hundreds of things in one run. Every check is rule-based, with **no LLM**, so the same input always gives the same answer. That makes it a good fit for CI pipelines, scheduled audits, and AI agents that need a repeatable check.
 
@@ -25,6 +25,13 @@ It is the same engine as the **QuassLabs API** (https://quasslabs.com/api) and t
 | `saas_metrics` | ARR, ARPA, LTV, CAC payback, Rule of 40, NRR/GRR from your MRR and customer numbers, each with a health tag. |
 | `estimate_sanity` | Hour estimates against benchmark ranges or your own historical actuals. |
 | `sprint_health` | Velocity, commitment reliability and spillover across 1-24 sprints. |
+| `actions_audit` | GitHub Actions workflows: script injection, unpinned actions, risky triggers and token permissions. |
+| `sql_migration_lint` | Postgres or MySQL migrations that lock or rewrite large tables, with a zero-downtime alternative. |
+| `coverage_check` | Which requirements your user stories cover, which have gaps, and which stories trace to nothing. |
+| `defect_triage` | Bug reports: severity, missing repro details, and a structured summary (one report or up to 50). |
+| `agent_card_lint` | A2A Agent Cards: spec conformance, discoverability and injection patterns. |
+| `skill_lint` | SKILL.md and AGENTS.md files: spec conformance, discoverability and injection patterns. |
+| `log_audit_creator` | An audit-log event catalog, schema and storage plan for your features (SOC 2, HIPAA, GDPR, PCI). |
 
 ## How to use it
 
@@ -87,6 +94,13 @@ You can call it from the Apify API, schedule it, chain it with webhooks, or hand
 | `estimate_sanity` | `{"estimates": [{"id": "T1", "type": "api_endpoint", "hours": 30}], "benchmarks": {"api_endpoint": {"min": 4, "max": 16}}}` |
 | `sprint_health` | `{"sprints": [{"name": "S1", "committed_points": 30, "completed_points": 24}, {"name": "S2", "committed_points": 28, "completed_points": 27}]}` |
 | `mcp_tool_lint` | `{"tools": [{"name": "search", "description": "Search.", "inputSchema": {"type": "object"}}]}` |
+| `actions_audit` | `{"workflow": "on: pull_request_target\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo \"${{ github.event.pull_request.title }}\""}` |
+| `sql_migration_lint` | `{"sql": "ALTER TABLE orders ADD COLUMN status text NOT NULL DEFAULT 'new';", "dialect": "postgres"}` |
+| `coverage_check` | `{"requirements": ["Users can reset a password", "Admins can export reports"], "stories": ["As a user I want to reset my password so that I can sign in"]}` |
+| `defect_triage` | `{"report": "App crashes on login after the 2.3 update. Steps: open the app, tap Sign in. Expected: home screen."}` |
+| `agent_card_lint` | `{"agent_card": {"name": "Weather agent", "description": "Forecasts by city.", "url": "https://agent.example.com", "skills": []}}` |
+| `skill_lint` | `{"text": "---\nname: pdf-merge\ndescription: Merge PDF files\n---\n# PDF merge\n"}` |
+| `log_audit_creator` | `{"features": ["login", "password reset", "admin user management"], "compliance": ["soc2"]}` |
 
 File inputs must be inline. `upload_id` is not supported in this Actor.
 
@@ -107,8 +121,8 @@ This Actor uses **pay-per-event** pricing with two events:
 
 | Event | Price | When it is charged |
 | --- | --- | --- |
-| `tool-call` | **$0.02** | Once for each input processed successfully, for every tool except `log_analyzer`. |
-| `heavy-tool-call` | **$0.08** | Once for each input `log_analyzer` processed successfully. |
+| `tool-call` | **$0.02** | Once for each input processed successfully, for every tool except `log_analyzer` and `log_audit_creator`. |
+| `heavy-tool-call` | **$0.08** | Once for each input `log_analyzer` or `log_audit_creator` processed successfully. |
 
 - A batch of 100 commits costs $2.00. A single regex check costs $0.02. Analysing one log costs $0.08.
 - **Failed items are free.** If an input is rejected (bad JSON, a 4xx or 5xx from the API, a network error), it is written to the dataset with `status: "error"` and not charged.

@@ -25,7 +25,14 @@
                 "dependency_check",
                 "saas_metrics",
                 "estimate_sanity",
-                "sprint_health"
+                "sprint_health",
+                "actions_audit",
+                "sql_migration_lint",
+                "coverage_check",
+                "defect_triage",
+                "agent_card_lint",
+                "skill_lint",
+                "log_audit_creator"
             ],
             "enumTitles": [
                 "Regex lint (ReDoS risk + explanation)",
@@ -42,7 +49,14 @@
                 "Dependency manifest check",
                 "SaaS metrics",
                 "Estimate sanity",
-                "Sprint health"
+                "Sprint health",
+                "GitHub Actions security audit",
+                "SQL migration lint (zero-downtime)",
+                "Requirements coverage check",
+                "Bug report triage",
+                "A2A Agent Card lint",
+                "Agent skill / AGENTS.md lint",
+                "Audit-log event catalog"
             ],
             "default": "regex_lint",
             "prefill": "regex_lint"
@@ -52,15 +66,19 @@
             "type": "object",
             "description": "The JSON body for one call of the selected tool. Ignored when `items` is non-empty. Example for regex_lint: {\"pattern\": \"(a+)+$\"}.",
             "editor": "json",
-            "prefill": { "pattern": "(a+)+$" }
+            "prefill": {
+                "pattern": "(a+)+$"
+            }
         },
         "items": {
             "title": "Batch of tool inputs",
             "type": "array",
-            "description": "Optional. A list of JSON bodies, each one call of the selected tool (max 1000 per run). One event is charged per item that succeeds (heavy-tool-call for log_analyzer, tool-call for the rest); failed items are free. When set, `input` is ignored.",
+            "description": "Optional. A list of JSON bodies, each one call of the selected tool (max 1000 per run). One event is charged per item that succeeds (heavy-tool-call for log_analyzer and log_audit_creator, tool-call for the rest); failed items are free. When set, `input` is ignored.",
             "editor": "json",
             "maxItems": 1000
         }
     },
-    "required": ["tool"]
+    "required": [
+        "tool"
+    ]
 }
