@@ -103,13 +103,14 @@ Export as JSON, CSV, Excel or HTML, or read it with the Apify API.
 
 ## How much does it cost?
 
-This Actor uses **pay-per-event** pricing with one event:
+This Actor uses **pay-per-event** pricing with two events:
 
 | Event | Price | When it is charged |
 | --- | --- | --- |
-| `tool-call` | **$0.01** | Once for each input the tool processed successfully. |
+| `tool-call` | **$0.02** | Once for each input processed successfully, for every tool except `log_analyzer`. |
+| `heavy-tool-call` | **$0.08** | Once for each input `log_analyzer` processed successfully. |
 
-- A batch of 100 commits costs $1.00. A single regex check costs $0.01.
+- A batch of 100 commits costs $2.00. A single regex check costs $0.02. Analysing one log costs $0.08.
 - **Failed items are free.** If an input is rejected (bad JSON, a 4xx or 5xx from the API, a network error), it is written to the dataset with `status: "error"` and not charged.
 - Set a **maximum cost per run** and the Actor stops before doing work it cannot bill, so you never pay more than your limit.
 - One item can carry a tool's own batch (for example `ticket_lint` with `tickets: [...]` up to 50). That is still one event.

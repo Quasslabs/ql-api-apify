@@ -15,8 +15,8 @@ from apify import Actor
 
 from .core import (
     DEFAULT_BASE_URL,
-    EVENT_NAME,
     InputError,
+    event_for,
     parse_input,
     pricing_warnings,
     run_batch,
@@ -56,6 +56,7 @@ async def main() -> None:
             return
 
         base_url = os.environ.get(BASE_URL_ENV, '').strip() or DEFAULT_BASE_URL
+        event_name = event_for(tool)
         charging = Actor.get_charging_manager()
         pricing = charging.get_pricing_info()
         for warning in pricing_warnings(pricing.is_pay_per_event, pricing.per_event_prices):
@@ -65,10 +66,10 @@ async def main() -> None:
             await Actor.push_data(record)
 
         async def charge():
-            return await Actor.charge(event_name=EVENT_NAME)
+            return await Actor.charge(event_name=event_name)
 
         def limit_reached() -> bool:
-            return charging.is_event_charge_limit_reached(EVENT_NAME)
+            return charging.is_event_charge_limit_reached(event_name)
 
         Actor.log.info('Running %s on %d item(s).', tool, len(items))
         async with httpx.AsyncClient(transport=_transport()) as client:
@@ -82,11 +83,12 @@ async def main() -> None:
                 push=push,
                 charge=charge,
                 limit_reached=limit_reached,
+                event_name=event_name,
             )
 
         message = (
             f'{tool}: {summary.succeeded} ok, {summary.failed} failed '
-            f'(charged {summary.charged} x {EVENT_NAME}).'
+            f'(charged {summary.charged} x {event_name}).'
         )
         if summary.stopped_on_limit:
             message += ' Stopped early: the run reached its maximum cost.'
