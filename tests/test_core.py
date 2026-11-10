@@ -265,3 +265,12 @@ def test_multi_tool_profile_still_requires_the_tool(monkeypatch):
     monkeypatch.delenv('QL_ACTOR_PROFILE', raising=False)
     with pytest.raises(InputError, match='Unknown tool'):
         parse_input({'input': {'pattern': 'a'}})
+
+
+def test_pricing_warnings_skip_heavy_event_without_heavy_tools(monkeypatch):
+    from decimal import Decimal
+    monkeypatch.setenv('QL_ACTOR_PROFILE', 'data-cleanup')
+    assert core.pricing_warnings(True, {'tool-call': Decimal('0.02')}) == []
+    monkeypatch.delenv('QL_ACTOR_PROFILE')
+    w = core.pricing_warnings(True, {'tool-call': Decimal('0.02')})
+    assert len(w) == 1 and 'heavy-tool-call' in w[0]
