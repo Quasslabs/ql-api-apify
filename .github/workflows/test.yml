@@ -1,0 +1,36 @@
+name: tests
+
+# Apify builds both Actors automatically on every push to main, so main must
+# only ever receive commits that pass these tests. Run them on every pull
+# request and on main itself (as a record of what was released).
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A newer push to the same PR or branch makes the older run pointless.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Actions are pinned to full commit SHAs; the comment names the release.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: '3.13'  # matches apify/actor-python in the Dockerfile
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      # Tests that compare against the platform checkout skip here; they run
+      # locally where that checkout exists.
+      - run: python -m pytest -q
