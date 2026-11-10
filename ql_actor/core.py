@@ -90,8 +90,10 @@ def pricing_warnings(is_pay_per_event: bool, per_event_prices: dict) -> list[str
         )
     if EVENT_NAME not in per_event_prices:
         out.append(f'Pricing has no "{EVENT_NAME}" event, so successful calls are not billed.')
-    if HEAVY_EVENT_NAME not in per_event_prices:
-        heavy = ', '.join(sorted(HEAVY_TOOLS))
+    # Only profiles that offer a heavy tool need the heavy event priced.
+    heavy_here = HEAVY_TOOLS & set(active_tools())
+    if heavy_here and HEAVY_EVENT_NAME not in per_event_prices:
+        heavy = ', '.join(sorted(heavy_here))
         out.append(f'Pricing has no "{HEAVY_EVENT_NAME}" event, so {heavy} calls are not billed.')
     return out
 
