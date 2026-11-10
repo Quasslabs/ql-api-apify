@@ -24,7 +24,7 @@ from typing import Any, Awaitable, Callable
 
 import httpx
 
-from .tools import HEAVY_TOOLS, endpoint_for
+from .tools import HEAVY_TOOLS, active_tools, endpoint_for
 
 # Event prices live in Apify Console (Publishing > Monetization), not in code.
 # Launch prices: tool-call $0.02, heavy-tool-call $0.08.
@@ -103,9 +103,12 @@ def parse_input(actor_input: dict | None) -> tuple[str, str, list[dict]]:
     """
     if not isinstance(actor_input, dict):
         raise InputError('Actor input must be a JSON object.')
+    tools = active_tools()
     tool = actor_input.get('tool')
+    if tool in (None, '') and len(tools) == 1:
+        tool = next(iter(tools))  # single-tool Actor: the field is optional
     try:
-        path = endpoint_for(tool)
+        path = endpoint_for(tool, tools)
     except ValueError as exc:
         raise InputError(str(exc)) from None
 

@@ -230,10 +230,13 @@ def test_pricing_warnings():
 
 
 def test_event_for_routes_heavy_tools():
+    from ql_actor.tools import HEAVY_TOOLS, PROFILES
     assert core.event_for('log_analyzer') == 'heavy-tool-call'
-    for tool in core.endpoint_for.__globals__['TOOLS']:
-        if tool != 'log_analyzer':
-            assert core.event_for(tool) == 'tool-call', tool
+    assert core.event_for('log_audit_creator') == 'heavy-tool-call'
+    for tools in PROFILES.values():
+        for tool in tools:
+            expected = 'heavy-tool-call' if tool in HEAVY_TOOLS else 'tool-call'
+            assert core.event_for(tool) == expected, tool
 
 
 async def test_batch_logs_the_event_it_was_given(caplog):
@@ -248,3 +251,17 @@ async def test_batch_logs_the_event_it_was_given(caplog):
         )
     assert summary.charged == 1 and h.charges == 1
     assert 'charged heavy-tool-call' in caplog.text
+
+
+def test_single_tool_profile_defaults_the_tool(monkeypatch):
+    monkeypatch.setenv('QL_ACTOR_PROFILE', 'data-cleanup')
+    tool, path, items = parse_input({'input': {'operation': 'json_shape', 'json': {}}})
+    assert (tool, path, len(items)) == ('data_transform', '/v1/data-transform', 1)
+    with pytest.raises(InputError, match='Unknown tool'):
+        parse_input({'tool': 'regex_lint', 'input': {}})
+
+
+def test_multi_tool_profile_still_requires_the_tool(monkeypatch):
+    monkeypatch.delenv('QL_ACTOR_PROFILE', raising=False)
+    with pytest.raises(InputError, match='Unknown tool'):
+        parse_input({'input': {'pattern': 'a'}})

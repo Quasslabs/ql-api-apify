@@ -1,0 +1,43 @@
+{
+    "$schema": "https://apify.com/schemas/v1/input.ide.json",
+    "title": "QuassLabs Data Cleanup input",
+    "description": "Give the data utility one input (`input`) or many (`items`). Each input is the JSON body of the QuassLabs data_transform endpoint: pick an `operation`, then fill only that operation's fields. See the README or https://docs.quasslabs.com.",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "tool": {
+            "title": "Tool",
+            "type": "string",
+            "description": "Only one tool in this Actor; leave it as is.",
+            "editor": "select",
+            "enum": [
+                "data_transform"
+            ],
+            "enumTitles": [
+                "Data transform (CSV, JSON, units, dedupe)"
+            ],
+            "default": "data_transform",
+            "prefill": "data_transform"
+        },
+        "input": {
+            "title": "Input (single call)",
+            "type": "object",
+            "description": "The JSON body for one call. Ignored when `items` is non-empty. Example: {\"operation\": \"csv_normalize\", \"csv\": \"Name;Email\\nAda;ada@example.com\", \"output\": \"json\"}.",
+            "editor": "json",
+            "prefill": {
+                "operation": "csv_normalize",
+                "csv": "First Name;E-mail\nAda;ada@example.com\nAda;ada@example.com\n",
+                "dedupe_rows": true,
+                "output": "json"
+            }
+        },
+        "items": {
+            "title": "Batch of inputs",
+            "type": "array",
+            "description": "Optional. A list of JSON bodies, one call each (max 1000 per run). One tool-call event is charged per item that succeeds; failed items are free. When set, `input` is ignored.",
+            "editor": "json",
+            "maxItems": 1000
+        }
+    },
+    "required": []
+}

@@ -1,0 +1,13 @@
+{
+    "$schema": "https://apify.com/schemas/v1/output.ide.json",
+    "actorOutputSchemaVersion": 1,
+    "title": "QuassLabs Dev QA Tools output",
+    "properties": {
+        "results": {
+            "type": "string",
+            "title": "Results",
+            "description": "One dataset item per processed input: {tool, input_index, status, result | error}.",
+            "template": "{{links.apiDefaultDatasetUrl}}/items"
+        }
+    }
+}
